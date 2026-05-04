@@ -99,6 +99,47 @@ function EquipmentListPage() {
     return `badge ${badges[condition] || 'badge-secondary'}`;
   };
 
+  const getCategoryIcon = (categoryName) => {
+    const icons = {
+      'Laptops': '💻',
+      'Projectors': '📽️',
+      'Cameras': '📷',
+      'Audio Equipment': '🎤',
+      'Lab Equipment': '🔬',
+      'Sports Equipment': '⚽',
+      'Tablets': '📱',
+      'Monitors': '🖥️',
+      'Printers': '🖨️',
+      'Networking': '🌐',
+      'Tools': '🔧',
+      'Furniture': '🪑',
+      'Vehicles': '🚗',
+      'Books': '📚',
+      'Musical Instruments': '🎸',
+      'Art Supplies': '🎨',
+      'Medical Equipment': '🏥',
+      'Safety Equipment': '🦺',
+      'Electronics': '⚡',
+      'Accessories': '🔌'
+    };
+    
+    // Try exact match first
+    if (icons[categoryName]) {
+      return icons[categoryName];
+    }
+    
+    // Try partial match
+    const lowerName = categoryName.toLowerCase();
+    for (const [key, icon] of Object.entries(icons)) {
+      if (lowerName.includes(key.toLowerCase()) || key.toLowerCase().includes(lowerName)) {
+        return icon;
+      }
+    }
+    
+    // Default icon
+    return '📦';
+  };
+
   if (loading) {
     return <div className="loading">Loading equipment...</div>;
   }
@@ -115,35 +156,53 @@ function EquipmentListPage() {
 
       {/* Search and Filter Bar */}
       <div className="search-filter-bar">
-        <input
-          type="text"
-          className="form-input search-input"
-          placeholder="Search equipment..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-        <select
-          className="form-select"
-          value={categoryFilter}
-          onChange={(e) => setCategoryFilter(e.target.value)}
-        >
-          <option value="">All Categories</option>
-          {categories.map((cat) => (
-            <option key={cat.id} value={cat.id}>
-              {cat.name}
-            </option>
-          ))}
-        </select>
-        <select
-          className="form-select"
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-        >
-          <option value="">All Status</option>
-          <option value="available">Available</option>
-          <option value="checked_out">Checked Out</option>
-          <option value="under_maintenance">Under Maintenance</option>
-        </select>
+        <div style={{ position: 'relative', flex: 1, minWidth: '250px' }}>
+          <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', fontSize: '1.2rem' }}>
+            🔍
+          </span>
+          <input
+            type="text"
+            className="form-input search-input"
+            placeholder="Search equipment..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            style={{ paddingLeft: '2.5rem' }}
+          />
+        </div>
+        <div style={{ position: 'relative' }}>
+          <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', fontSize: '1.2rem', pointerEvents: 'none' }}>
+            📂
+          </span>
+          <select
+            className="form-select"
+            value={categoryFilter}
+            onChange={(e) => setCategoryFilter(e.target.value)}
+            style={{ paddingLeft: '2.5rem' }}
+          >
+            <option value="">All Categories</option>
+            {categories.map((cat) => (
+              <option key={cat.id} value={cat.id}>
+                {cat.name}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div style={{ position: 'relative' }}>
+          <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', fontSize: '1.2rem', pointerEvents: 'none' }}>
+            📊
+          </span>
+          <select
+            className="form-select"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            style={{ paddingLeft: '2.5rem' }}
+          >
+            <option value="">All Status</option>
+            <option value="available">Available</option>
+            <option value="checked_out">Checked Out</option>
+            <option value="under_maintenance">Under Maintenance</option>
+          </select>
+        </div>
       </div>
 
       {/* Equipment Grid */}
@@ -153,8 +212,15 @@ function EquipmentListPage() {
         ) : (
           equipment.map((item) => (
             <div key={item.id} className="equipment-card">
-              <div className="equipment-name">{item.name}</div>
-              <div className="equipment-serial">Serial: {item.serial_number}</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.5rem' }}>
+                <span style={{ fontSize: '3rem', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))' }}>
+                  {getCategoryIcon(item.category.name)}
+                </span>
+                <div style={{ flex: 1 }}>
+                  <div className="equipment-name">{item.name}</div>
+                  <div className="equipment-serial">Serial: {item.serial_number}</div>
+                </div>
+              </div>
               <div className="equipment-description">{item.description}</div>
               <div className="equipment-meta">
                 <div>
@@ -168,13 +234,13 @@ function EquipmentListPage() {
                 </div>
                 <div>
                   <small style={{ color: '#7f8c8d' }}>
-                    {item.category.name}
+                    📂 {item.category.name}
                   </small>
                 </div>
               </div>
               <div style={{ marginTop: '1rem' }}>
                 <small style={{ color: '#7f8c8d' }}>
-                  Available: {item.available_quantity} / {item.quantity}
+                  📊 Available: {item.available_quantity} / {item.quantity}
                 </small>
               </div>
               {item.status === 'available' && item.available_quantity > 0 && (
@@ -183,7 +249,7 @@ function EquipmentListPage() {
                   style={{ width: '100%', marginTop: '1rem' }}
                   onClick={() => handleBorrowClick(item)}
                 >
-                  Request to Borrow
+                  📝 Request to Borrow
                 </button>
               )}
             </div>
